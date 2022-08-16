@@ -1,0 +1,4 @@
+(library
+ (name wav)
+ (public_name wav)
+ (libraries cstruct fmt))

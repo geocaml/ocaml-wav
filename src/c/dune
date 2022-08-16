@@ -1,0 +1,5 @@
+(library
+ (name wav_conv)
+ (optional)
+ (public_name wav.conv)
+ (libraries wav ctypes))

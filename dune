@@ -1,0 +1,4 @@
+(mdx
+ (files README.md)
+ (packages wav)
+ (preludes docs/prelude.txt))
