@@ -14,6 +14,7 @@ type header = {
 }
 
 let sample_size header = header.bits_per_sample / 8
+let sample_rate h = h.sample_rate
 
 let pp_format ppf = function
   | `PCM -> Fmt.pf ppf "PCM"
@@ -141,7 +142,22 @@ let ensure_slow_path t n =
 
 let ensure t n = if t.len < n then ensure_slow_path t n
 
-let sample_exn reader =
+let is_int8 r =
+  match (r.header.audio_format, r.header.bits_per_sample) with
+  | `PCM, 8 -> true
+  | _ -> false
+
+let is_int16 r =
+  match (r.header.audio_format, r.header.bits_per_sample) with
+  | `PCM, 16 -> true
+  | _ -> false
+
+let is_float32 r =
+  match (r.header.audio_format, r.header.bits_per_sample) with
+  | _, 32 -> true
+  | _ -> false
+
+let raw_sample_exn reader =
   try
     let sample_size = reader.header.bits_per_sample / 8 in
     ensure reader sample_size;
@@ -150,8 +166,64 @@ let sample_exn reader =
     c
   with End_of_file -> raise Not_found
 
-let sample e = try Some (sample_exn e) with Not_found -> None
+let raw_sample e = try Some (raw_sample_exn e) with Not_found -> None
 
 let raw_samples reader =
   ensure reader (Int32.to_int reader.header.data_size);
   Cstruct.to_bigarray (peek reader)
+
+let sample_int16_exn r =
+  let buf = raw_sample_exn r in
+  Cstruct.LE.get_uint16 buf 0
+
+let sample_int16 r = try Some (sample_int16_exn r) with _ -> None
+
+(* open Ctypes *)
+
+let check_type t r =
+  if t r then ()
+  else invalid_arg "Trying to convert to an incompatible bigarray!"
+
+let samples_int16 r =
+  check_type is_int16 r;
+  let sample_size = r.header.bits_per_sample / 8 in
+  let samples = Int32.to_int r.header.data_size / sample_size / r.header.num_channels in
+  let ba = Bigarray.Array1.(create Int16_signed C_layout samples) in
+  for i = 0 to samples - 1 do
+    Bigarray.Array1.set ba i (sample_int16_exn r)
+  done;
+  ba
+
+
+module Signal_ext = struct
+  include Owl_signal
+  module N = Owl_dense_ndarray_generic
+
+  let pad_or_sub nd n =
+    let l = Owl_dense_ndarray_z.nth_dim nd 0 in
+    if n < l then Owl_dense_ndarray_z.slice_left nd [| n |] else
+    if n > l then Owl_dense_ndarray_z.pad ~v:Complex.zero [ [ 0; n - l ] ] nd
+    else nd 
+    
+
+  let hilbert axis nd =
+    let n = (N.shape nd).(axis) in
+    let xf = Owl_fft_d.rfft ~axis nd in
+    let xf = pad_or_sub xf n in
+    let h = N.zeros Bigarray.complex64 [| n |] in
+    if n mod 2 = 0 then begin
+      N.set h [| 0 |] Complex.one; 
+      N.set h [| n / 2 |] Complex.one;
+      for i = 1 to n / 2 do
+        N.set h [| i |] Complex.(add one one)
+      done
+    end else begin
+      N.set h [| 0 |] Complex.one; 
+      for i = 1 to (n + 1) / 2 do
+        N.set h [| i |] Complex.(add one one)
+      done
+    end;
+    Printf.printf "N: %i %i %i\n%!" n (Owl_dense_ndarray_z.nth_dim xf 0) (Owl_dense_ndarray_z.nth_dim h 0);
+    Owl_dense_matrix_z.(mul_ xf h);
+    Owl_fft_d.irfft ~axis xf
+end

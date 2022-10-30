@@ -1,2 +1,3 @@
 #require "wav";;
+#require "wav.conv";;
 #require "eio_main";;

@@ -93,5 +93,13 @@ We can see some important information, such as:
 The Automatic Picture Transmission (APT) format tells us that the 4160 words per second which means we'll first have to downsample the data.
 
 ```ocaml
-# let all_samples reader = Wav.raw_samples reader
+# Wav_conv.float32;;
+- : Wav.reader ->
+    (float, Bigarray.float32_elt, Bigarray.c_layout) Bigarray.Array1.t
+= <fun>
+# Eio_main.run @@ fun env ->
+  let fs = Eio.Stdenv.cwd env in
+  with_reader ~fs @@ fun r -> 
+  let ba = Wav_conv.float32 r in
+  Float.abs @@ Bigarray.Array1.get ba 34000;;
 ```

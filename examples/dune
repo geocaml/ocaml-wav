@@ -1,0 +1,3 @@
+(executable
+ (name noaa)
+ (libraries eio_main wav wav.conv owl owl-plplot imagelib.unix))
