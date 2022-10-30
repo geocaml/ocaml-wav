@@ -223,7 +223,6 @@ module Signal_ext = struct
         N.set h [| i |] Complex.(add one one)
       done
     end;
-    Printf.printf "N: %i %i %i\n%!" n (Owl_dense_ndarray_z.nth_dim xf 0) (Owl_dense_ndarray_z.nth_dim h 0);
     Owl_dense_matrix_z.(mul_ xf h);
     Owl_fft_d.irfft ~axis xf
 end

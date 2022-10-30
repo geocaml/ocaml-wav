@@ -1,17 +1,17 @@
-open Owl_plplot
-open Owl
-
+(* $MDX part-begin=source *)
 let src ~flow buf = Eio.Flow.read flow buf
 
 let with_reader ~fs fn =
-  Eio.Path.(with_open_in (fs / "data" / "noaa-example.wav")) @@ fun flow ->
+  Eio.Path.(with_open_in (fs / Sys.argv.(1))) @@ fun flow ->
   fn @@ Wav.reader (src ~flow)
+(* $MDX part-end *)
 
+(* 
 let plot length ys =
   let h = Plot.create "plot.png" in
   let xs = Mat.linspace 0. (float_of_int length) length in
   Plot.plot ~h ~spec:[ RGB (255,0,0); LineStyle 1 ] xs ys;
-  Plot.output h
+  Plot.output h *)
 
 let chunk_writer_of_flow flow = function
   | `String s -> Ok (Eio.Flow.copy_string s flow)
@@ -33,10 +33,10 @@ let image path r nd =
 
 let () =
   Eio_main.run @@ fun env ->
-  let fs = Eio.Stdenv.cwd env in
+  let fs = Eio.Stdenv.fs env in
   let path = Eio.Path.(fs / "noaa.png") in
   with_reader ~fs @@ fun r ->
-  Format.printf "%a%!" Wav.pp_header (Wav.header r);
+  Format.printf "<><><> NOAA Decoding <><><>\n%a%!" Wav.pp_header (Wav.header r);
   let ba = Wav.samples_int16 r in
   let ba = Bigarray.genarray_of_array1 @@ Wav_conv.int16_to_float64 ba in 
   let ba = Wav.Signal_ext.hilbert 0 ba in

@@ -1,6 +1,8 @@
 ocaml-wav
 ---------
 
+*Very WIP & Experimental*
+
 WAV file reader and writer in pure OCaml.
 
 ## Reading WAV Files
@@ -90,16 +92,6 @@ We can see some important information, such as:
  - There is only one channel.
  - There are `11025` samples per second.
 
-The Automatic Picture Transmission (APT) format tells us that the 4160 words per second which means we'll first have to downsample the data.
+[TODO: explain this code in noaa.ml](./examples/noaa.ml)
 
-```ocaml
-# Wav_conv.float32;;
-- : Wav.reader ->
-    (float, Bigarray.float32_elt, Bigarray.c_layout) Bigarray.Array1.t
-= <fun>
-# Eio_main.run @@ fun env ->
-  let fs = Eio.Stdenv.cwd env in
-  with_reader ~fs @@ fun r -> 
-  let ba = Wav_conv.float32 r in
-  Float.abs @@ Bigarray.Array1.get ba 34000;;
-```
+![NOAA satellite image decoded from the raw WAV file](./examples/noaa.png)

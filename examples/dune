@@ -1,3 +1,9 @@
 (executable
  (name noaa)
- (libraries eio_main wav wav.conv owl owl-plplot imagelib.unix))
+ (libraries eio_main wav wav.conv imagelib.unix))
+
+(rule
+ (mode promote)
+ (deps ../data/noaa-example.wav)
+ (targets ./noaa.png)
+ (action (run ./noaa.exe ../data/noaa-example.wav)))
