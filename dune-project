@@ -16,4 +16,4 @@
  (depends 
    cstruct 
    fmt 
-   owl))
+   owl-base))

@@ -3,7 +3,6 @@ type dst
 type header
 
 val sample_rate : header -> int32
-
 val pp_header : header Fmt.t
 
 type reader
@@ -24,10 +23,3 @@ val reader : ?initial_size:int -> ?max_size:int -> src -> reader
 val is_int8 : reader -> bool
 val is_int16 : reader -> bool
 val is_float32 : reader -> bool
-
-module Signal_ext : sig
-    val hilbert : 
-        int ->
-        (float, Bigarray.float64_elt, Bigarray.c_layout) Bigarray.Genarray.t ->
-        (float, Bigarray.float64_elt) Owl_dense_ndarray_generic.t
-end

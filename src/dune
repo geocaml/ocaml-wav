@@ -1,4 +1,4 @@
 (library
  (name wav)
  (public_name wav)
- (libraries cstruct fmt owl))
+ (libraries cstruct fmt owl-base))

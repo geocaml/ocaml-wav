@@ -6,4 +6,5 @@
  (mode promote)
  (deps ../data/noaa-example.wav)
  (targets ./noaa.png)
- (action (run ./noaa.exe ../data/noaa-example.wav)))
+ (action
+  (run ./noaa.exe ../data/noaa-example.wav)))
