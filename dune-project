@@ -11,5 +11,9 @@
 
 (package
  (name wav)
- (synopsis "TODO")
- (description "TODO"))
+ (synopsis "Pure OCaml WAV library")
+ (description "An OCaml library for reading WAV files")
+ (depends 
+   cstruct 
+   fmt 
+   owl))
